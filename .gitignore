@@ -1,0 +1,28 @@
+@'
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build artefacts
+bin/
+obj/
+[Bb]uild/
+[Ll]og/
+
+# Rider/JetBrains
+.idea/
+*.DotSettings.user
+
+# NuGet
+*.nupkg
+packages/
+*.snupkg
+
+# Misc
+*.psess
+*.vsp
+*.vspx
+'@ | Set-Content -Encoding UTF8 .gitignore
