@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- SQLite provider for .NET (Microsoft) -->
+		<PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- Infrastructure depends on Application and Domain -->
+		<ProjectReference Include="..\CarRental.Application\CarRental.Application.csproj" />
+		<ProjectReference Include="..\CarRental.Domain\CarRental.Domain.csproj" />
+	</ItemGroup>
+
+</Project>
