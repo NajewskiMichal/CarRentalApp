@@ -10,6 +10,7 @@ using CarRental.ConsoleUI.Commands.Customer;
 using CarRental.ConsoleUI.Commands.Dashboard;
 using CarRental.ConsoleUI.Commands.Rental;
 using CarRental.ConsoleUI.Commands.System;
+using CarRental.ConsoleUI.Commands.User;
 using CarRental.ConsoleUI.Input;
 using CarRental.Infrastructure.Configuration;
 using CarRental.Infrastructure.Logging;
@@ -46,9 +47,18 @@ namespace CarRental.ConsoleUI.CompositionRoot
             // Application services
             ICarService carService = new CarService(carRepository, logger);
             ICustomerService customerService = new CustomerService(customerRepository, logger);
-            IRentalService rentalService = new RentalService(rentalRepository, carRepository, customerRepository, logger);
+            IRentalService rentalService = new RentalService(
+                rentalRepository,
+                carRepository,
+                customerRepository,
+                logger);
             IAuthService authService = new AuthService(userRepository, passwordHasher, logger);
-            IDashboardService dashboardService = new DashboardService(carRepository, customerRepository, rentalRepository);
+            IDashboardService dashboardService = new DashboardService(
+                carRepository,
+                customerRepository,
+                rentalRepository);
+            IUserManagementService userManagementService =
+                new UserManagementService(userRepository, passwordHasher, logger);
 
             // UI helpers
             var inputValidator = new InputValidator();
@@ -78,6 +88,15 @@ namespace CarRental.ConsoleUI.CompositionRoot
 
                 // Dashboard
                 new ShowDashboardCommand(dashboardService),
+
+                // User management (admin only)
+                new ListUsersCommand(userManagementService),
+                new ViewUserDetailsCommand(inputValidator, userManagementService),
+                new AddUserCommand(inputValidator, userManagementService),
+                new EditUserCommand(inputValidator, userManagementService),
+                new ChangeUserPasswordCommand(inputValidator, userManagementService),
+                new ChangeUserRoleCommand(inputValidator, userManagementService),
+                new DeleteUserCommand(inputValidator, userManagementService),
 
                 // System
                 new ExitApplicationCommand()

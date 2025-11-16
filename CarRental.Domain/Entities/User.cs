@@ -43,6 +43,26 @@ namespace CarRental.Domain.Entities
             Role = role;
         }
 
+        public void UpdateUsername(string username)
+        {
+            SetUsername(username);
+        }
+
+        public void UpdateEmail(Email email)
+        {
+            Email = email ?? throw new DomainException("Email cannot be null.");
+        }
+
+        public void UpdatePassword(string passwordHash, string salt)
+        {
+            SetPassword(passwordHash, salt);
+        }
+
+        public void ChangeRole(UserRole role)
+        {
+            Role = role;
+        }
+
         private void SetUsername(string username)
         {
             if (string.IsNullOrWhiteSpace(username))

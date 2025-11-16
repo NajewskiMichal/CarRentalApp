@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using CarRental.ConsoleUI.Authentication;
 using CarRental.ConsoleUI.CompositionRoot;
 using CarRental.ConsoleUI.Input;
 using CarRental.ConsoleUI.Menu;
@@ -31,6 +32,9 @@ namespace CarRental.ConsoleUI
                 return;
             }
 
+            // Set current user context (used for admin checks)
+            UserContext.SetCurrentUser(user);
+
             ConsoleHelper.WriteInfo($"Logged in as: {user.Username} ({user.Role})");
             ConsoleHelper.WaitForKeyPress();
 
@@ -43,7 +47,8 @@ namespace CarRental.ConsoleUI
                 mainMenu.Display();
 
                 var choice = inputValidator.ReadInput("Choose an option: ");
-                var command = app.Commands.SingleOrDefault(c => c.Key.Equals(choice, StringComparison.OrdinalIgnoreCase));
+                var command = app.Commands.SingleOrDefault(
+                    c => c.Key.Equals(choice, StringComparison.OrdinalIgnoreCase));
 
                 if (command == null)
                 {
