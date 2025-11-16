@@ -65,7 +65,8 @@ namespace CarRental.ConsoleUI.Authentication
 
             var username = _inputValidator.ValidateInputNotEmpty("Username: ");
             Console.Write("Password: ");
-            var password = ReadPassword();
+            var password = SecureConsoleInput.ReadPassword("Password: ");
+
 
             var user = await _authService.LoginAsync(username, password);
             if (user is null)

@@ -25,6 +25,19 @@ namespace CarRental.ConsoleUI.Input
             }
         }
 
+        public string ValidatePasswordNotEmpty(string prompt)
+        {
+            while (true)
+            {
+                var password = SecureConsoleInput.ReadPassword(prompt);
+
+                if (!string.IsNullOrWhiteSpace(password))
+                    return password;
+
+                ConsoleHelper.WriteError("Password cannot be empty.");
+            }
+        }
+
         public int ValidateIntegerInput(string prompt)
         {
             while (true)

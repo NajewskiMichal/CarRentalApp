@@ -34,7 +34,14 @@ namespace CarRental.ConsoleUI.Commands.User
             ConsoleHelper.WriteHeader("Change employee password");
 
             var id = _input.ValidateIntegerInput("User ID: ");
-            var newPassword = _input.ValidateInputNotEmpty("New password: ");
+
+            var newPassword = SecureConsoleInput.ReadPassword("New password: ");
+            if (string.IsNullOrWhiteSpace(newPassword))
+            {
+                ConsoleHelper.WriteError("Password cannot be empty.");
+                ConsoleHelper.WaitForKeyPress();
+                return;
+            }
 
             try
             {
