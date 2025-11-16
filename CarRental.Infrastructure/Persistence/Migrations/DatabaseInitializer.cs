@@ -97,14 +97,21 @@ CREATE TABLE IF NOT EXISTS Users (
             // so the admin user should be seeded from the composition root (ConsoleUI)
             // or you can insert a placeholder and force password reset.
             //
-            // For now we'll insert a dummy user with impossible password.
+            // Seed default admin user with a real hashed password (password: admin123)
             await using (var insertCmd = connection.CreateCommand())
             {
                 insertCmd.CommandText = @"
 INSERT INTO Users (Username, Email, PasswordHash, Salt, Role)
-VALUES ('admin', 'admin@example.com', 'RESET_ME', 'RESET_ME', 1);";
+VALUES (
+    'admin',
+    'admin@example.com',
+    'tuuLxfgxCnjP/ODFe3AVvjJmwfpgEuFzpTNKJSHGTMs=',
+    'rZToGkrZ/0m/0Q8tPwkcNg==',
+    1
+);";
                 await insertCmd.ExecuteNonQueryAsync();
             }
+
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Security.Cryptography;
-using System.Text;
 using CarRental.Application.Interfaces.Infrastructure;
 
 namespace CarRental.Infrastructure.Security
@@ -14,33 +13,65 @@ namespace CarRental.Infrastructure.Security
         private const int KeySize = 32;         // 256-bit
         private const int Iterations = 100_000; // quite safe for local app
 
+        /// <summary>
+        /// Hashes a password and returns Base64-encoded hash + salt (out).
+        /// </summary>
         public string HashPassword(string password, out string salt)
         {
             if (password == null) throw new ArgumentNullException(nameof(password));
 
-            using var rng = RandomNumberGenerator.Create();
+            // generate random salt
             var saltBytes = new byte[SaltSize];
-            rng.GetBytes(saltBytes);
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(saltBytes);
+            }
 
-            using var pbkdf2 = new Rfc2898DeriveBytes(password, saltBytes, Iterations, HashAlgorithmName.SHA256);
-            var key = pbkdf2.GetBytes(KeySize);
+            // derive key
+            using var pbkdf2 = new Rfc2898DeriveBytes(
+                password,
+                saltBytes,
+                Iterations,
+                HashAlgorithmName.SHA256);
+
+            var hashBytes = pbkdf2.GetBytes(KeySize);
 
             salt = Convert.ToBase64String(saltBytes);
-            var hash = Convert.ToBase64String(key);
+            var passwordHash = Convert.ToBase64String(hashBytes);
 
-            return hash;
+            return passwordHash;
         }
 
+        /// <summary>
+        /// Verifies a password against Base64-encoded salt and hash.
+        /// Gdy salt/hash nie są poprawnym Base64 (np. RESET_ME) – zwraca false, zamiast rzucać wyjątek.
+        /// </summary>
         public bool VerifyPassword(string password, string salt, string passwordHash)
         {
             if (password == null) throw new ArgumentNullException(nameof(password));
             if (salt == null) throw new ArgumentNullException(nameof(salt));
             if (passwordHash == null) throw new ArgumentNullException(nameof(passwordHash));
 
-            var saltBytes = Convert.FromBase64String(salt);
-            var hashBytes = Convert.FromBase64String(passwordHash);
+            byte[] saltBytes;
+            byte[] hashBytes;
 
-            using var pbkdf2 = new Rfc2898DeriveBytes(password, saltBytes, Iterations, HashAlgorithmName.SHA256);
+            try
+            {
+                saltBytes = Convert.FromBase64String(salt);
+                hashBytes = Convert.FromBase64String(passwordHash);
+            }
+            catch (FormatException)
+            {
+                
+                return false;
+            }
+
+            using var pbkdf2 = new Rfc2898DeriveBytes(
+                password,
+                saltBytes,
+                Iterations,
+                HashAlgorithmName.SHA256);
+
             var computedHash = pbkdf2.GetBytes(KeySize);
 
             return CryptographicOperations.FixedTimeEquals(hashBytes, computedHash);
