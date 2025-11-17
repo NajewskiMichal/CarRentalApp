@@ -96,10 +96,8 @@ CREATE TABLE IF NOT EXISTS Users (
                 }
             }
 
-            // We cannot access PasswordHasher here (that's application-level dependency),
-            // so the admin user should be seeded from the composition root (ConsoleUI)
-            // or you can insert a placeholder and force password reset.
-            //
+           
+            
             // Seed default admin user with a real hashed password (password: admin123)
 
             await using (var insertCmd = connection.CreateCommand())

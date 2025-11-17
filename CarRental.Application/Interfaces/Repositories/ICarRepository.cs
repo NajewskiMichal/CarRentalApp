@@ -14,21 +14,13 @@ namespace CarRental.Application.Interfaces.Repositories
 
         Task<IReadOnlyList<Car>> SearchByBrandAsync(string brand);
 
-        // --- NOWE METODY DLA ADMINA ---
-
-        /// <summary>
-        /// Zwraca wszystkie auta, zarówno aktywne, jak i archiwalne.
-        /// </summary>
+        
         Task<IReadOnlyList<Car>> GetAllIncludingInactiveAsync();
 
-        /// <summary>
-        /// Zwraca tylko auta archiwalne (IsActive = 0).
-        /// </summary>
+        
         Task<IReadOnlyList<Car>> GetInactiveAsync();
 
-        /// <summary>
-        /// Ustawia flagę IsActive dla danego auta (true = aktywne, false = archiwalne).
-        /// </summary>
+        
         Task SetActiveAsync(int id, bool isActive);
     }
 }

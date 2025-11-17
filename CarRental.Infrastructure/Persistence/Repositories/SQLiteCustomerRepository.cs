@@ -83,9 +83,7 @@ WHERE Id = @Id;";
             await cmd.ExecuteNonQueryAsync();
         }
 
-        /// <summary>
-        /// Soft delete: klient staje się archiwalny (IsActive = 0).
-        /// </summary>
+       
         public async Task DeleteAsync(int id)
         {
             await SetActiveAsync(id, false);
@@ -112,7 +110,7 @@ ORDER BY Name;";
             return result;
         }
 
-        // --- NOWE METODY DLA ADMINA ---
+        
 
         public async Task<IReadOnlyList<Customer>> GetAllIncludingInactiveAsync()
         {

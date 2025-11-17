@@ -9,7 +9,7 @@ namespace CarRental.ConsoleUI.Commands.System
 
         public Task ExecuteAsync()
         {
-            // Najprościej – wyjście z procesu.
+            // exit the process
             Environment.Exit(0);
             return Task.CompletedTask;
         }

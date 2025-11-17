@@ -37,7 +37,7 @@ namespace CarRental.ConsoleUI.Commands.User
             var username = _input.ValidateInputNotEmpty("Username: ");
             var email = _input.ValidateInputNotEmpty("Email: ");
 
-            // Hasło – wprowadzane z gwiazdkami
+            
             var password = SecureConsoleInput.ReadPassword("Password: ");
             if (string.IsNullOrWhiteSpace(password))
             {

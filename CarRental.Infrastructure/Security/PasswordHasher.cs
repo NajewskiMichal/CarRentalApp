@@ -44,7 +44,6 @@ namespace CarRental.Infrastructure.Security
 
         /// <summary>
         /// Verifies a password against Base64-encoded salt and hash.
-        /// Gdy salt/hash nie są poprawnym Base64 (np. RESET_ME) – zwraca false, zamiast rzucać wyjątek.
         /// </summary>
         public bool VerifyPassword(string password, string salt, string passwordHash)
         {

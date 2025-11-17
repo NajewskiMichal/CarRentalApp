@@ -86,9 +86,7 @@ WHERE Id = @Id;";
             await cmd.ExecuteNonQueryAsync();
         }
 
-        /// <summary>
-        /// Soft delete: oznaczamy IsActive = 0 (archiwum), zamiast fizycznie usuwać.
-        /// </summary>
+        
         public async Task DeleteAsync(int id)
         {
             await SetActiveAsync(id, false);
@@ -115,7 +113,7 @@ ORDER BY Brand, Model;";
             return result;
         }
 
-        // --- NOWE METODY DLA ADMINA ---
+        
 
         public async Task<IReadOnlyList<Car>> GetAllIncludingInactiveAsync()
         {

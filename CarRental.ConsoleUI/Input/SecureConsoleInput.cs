@@ -5,10 +5,7 @@ namespace CarRental.ConsoleUI.Input
 {
     public static class SecureConsoleInput
     {
-        /// <summary>
-        /// Czyta hasło z konsoli z maskowaniem '*' (bez walidacji).
-        /// Zwraca dokładnie to, co użytkownik wpisał (może być puste).
-        /// </summary>
+        
         public static string ReadPassword(string prompt)
         {
             Console.Write(prompt);

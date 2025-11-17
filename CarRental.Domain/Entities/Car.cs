@@ -47,7 +47,7 @@ namespace CarRental.Domain.Entities
 
         private void SetYear(int year)
         {
-            // Simple range validation – can be adjusted if needed.
+            
             if (year < 1950 || year > 2100)
                 throw new DomainException("Year is out of valid range.");
 

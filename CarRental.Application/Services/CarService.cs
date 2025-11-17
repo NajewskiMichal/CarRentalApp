@@ -56,7 +56,7 @@ namespace CarRental.Application.Services
             if (car is null)
                 throw new NotFoundException(nameof(Car), id);
 
-            // Tworzymy nową instancję – można też dodać metody update w encji.
+            
             var updatedCar = new Car(id, brand, model, year, vin);
             await _carRepository.UpdateAsync(updatedCar);
 

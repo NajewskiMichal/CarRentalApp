@@ -14,21 +14,13 @@ namespace CarRental.Application.Interfaces.Repositories
 
         Task<User?> GetByUsernameAsync(string username);
 
-        // --- NOWE METODY DLA ADMINA ---
-
-        /// <summary>
-        /// Zwraca wszystkich użytkowników, zarówno aktywnych, jak i archiwalnych.
-        /// </summary>
+        
         Task<IReadOnlyList<User>> GetAllIncludingInactiveAsync();
 
-        /// <summary>
-        /// Zwraca tylko użytkowników archiwalnych (IsActive = 0).
-        /// </summary>
+       
         Task<IReadOnlyList<User>> GetInactiveAsync();
 
-        /// <summary>
-        /// Ustawia flagę IsActive dla danego użytkownika (true = aktywny, false = archiwalny).
-        /// </summary>
+       
         Task SetActiveAsync(int id, bool isActive);
     }
 }

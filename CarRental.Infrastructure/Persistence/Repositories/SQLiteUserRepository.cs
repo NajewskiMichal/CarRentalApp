@@ -102,7 +102,7 @@ WHERE Id = @Id;";
         }
 
         /// <summary>
-        /// Soft delete: użytkownik staje się nieaktywny (IsActive = 0).
+        /// Soft delete: user becomes inactive (IsActive = 0).
         /// </summary>
         public async Task DeleteAsync(int id)
         {
@@ -128,7 +128,6 @@ WHERE Username = @Username AND IsActive = 1;";
             return null;
         }
 
-        // --- NOWE METODY DLA ADMINA ---
 
         public async Task<IReadOnlyList<User>> GetAllIncludingInactiveAsync()
         {
