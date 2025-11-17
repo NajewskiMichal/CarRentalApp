@@ -21,7 +21,7 @@ namespace CarRental.Infrastructure.Persistence.Repositories
         {
             await using var connection = await _connectionFactory.CreateOpenConnectionAsync();
             await using var cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT Id, Brand, Model, Year, Vin FROM Cars WHERE Id = @Id;";
+            cmd.CommandText = "SELECT Id, Brand, Model, Year, Vin FROM Cars WHERE Id = @Id AND IsActive = 1;";
             AddParameter(cmd, "@Id", id);
 
             await using var reader = await cmd.ExecuteReaderAsync();
@@ -38,7 +38,7 @@ namespace CarRental.Infrastructure.Persistence.Repositories
             var result = new List<Car>();
             await using var connection = await _connectionFactory.CreateOpenConnectionAsync();
             await using var cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT Id, Brand, Model, Year, Vin FROM Cars ORDER BY Brand, Model;";
+            cmd.CommandText = "SELECT Id, Brand, Model, Year, Vin FROM Cars WHERE IsActive = 1 ORDER BY Brand, Model;";
 
             await using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
@@ -86,13 +86,12 @@ WHERE Id = @Id;";
             await cmd.ExecuteNonQueryAsync();
         }
 
+        /// <summary>
+        /// Soft delete: oznaczamy IsActive = 0 (archiwum), zamiast fizycznie usuwać.
+        /// </summary>
         public async Task DeleteAsync(int id)
         {
-            await using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-            await using var cmd = connection.CreateCommand();
-            cmd.CommandText = "DELETE FROM Cars WHERE Id = @Id;";
-            AddParameter(cmd, "@Id", id);
-            await cmd.ExecuteNonQueryAsync();
+            await SetActiveAsync(id, false);
         }
 
         public async Task<IReadOnlyList<Car>> SearchByBrandAsync(string brand)
@@ -103,7 +102,7 @@ WHERE Id = @Id;";
             cmd.CommandText = @"
 SELECT Id, Brand, Model, Year, Vin
 FROM Cars
-WHERE Brand LIKE @Brand
+WHERE Brand LIKE @Brand AND IsActive = 1
 ORDER BY Brand, Model;";
             AddParameter(cmd, "@Brand", $"%{brand}%");
 
@@ -115,6 +114,52 @@ ORDER BY Brand, Model;";
 
             return result;
         }
+
+        // --- NOWE METODY DLA ADMINA ---
+
+        public async Task<IReadOnlyList<Car>> GetAllIncludingInactiveAsync()
+        {
+            var result = new List<Car>();
+            await using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+            await using var cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT Id, Brand, Model, Year, Vin FROM Cars ORDER BY IsActive DESC, Brand, Model;";
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                result.Add(MapCar(reader));
+            }
+
+            return result;
+        }
+
+        public async Task<IReadOnlyList<Car>> GetInactiveAsync()
+        {
+            var result = new List<Car>();
+            await using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+            await using var cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT Id, Brand, Model, Year, Vin FROM Cars WHERE IsActive = 0 ORDER BY Brand, Model;";
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                result.Add(MapCar(reader));
+            }
+
+            return result;
+        }
+
+        public async Task SetActiveAsync(int id, bool isActive)
+        {
+            await using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+            await using var cmd = connection.CreateCommand();
+            cmd.CommandText = "UPDATE Cars SET IsActive = @IsActive WHERE Id = @Id;";
+            AddParameter(cmd, "@Id", id);
+            AddParameter(cmd, "@IsActive", isActive ? 1 : 0);
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        // --- helpers ---
 
         private static Car MapCar(DbDataReader reader)
         {

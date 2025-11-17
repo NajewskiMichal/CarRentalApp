@@ -22,7 +22,7 @@ namespace CarRental.Infrastructure.Persistence.Repositories
         {
             await using var connection = await _connectionFactory.CreateOpenConnectionAsync();
             await using var cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT Id, Name, Email FROM Customers WHERE Id = @Id;";
+            cmd.CommandText = "SELECT Id, Name, Email FROM Customers WHERE Id = @Id AND IsActive = 1;";
             AddParameter(cmd, "@Id", id);
 
             await using var reader = await cmd.ExecuteReaderAsync();
@@ -39,7 +39,7 @@ namespace CarRental.Infrastructure.Persistence.Repositories
             var result = new List<Customer>();
             await using var connection = await _connectionFactory.CreateOpenConnectionAsync();
             await using var cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT Id, Name, Email FROM Customers ORDER BY Name;";
+            cmd.CommandText = "SELECT Id, Name, Email FROM Customers WHERE IsActive = 1 ORDER BY Name;";
 
             await using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
@@ -83,13 +83,12 @@ WHERE Id = @Id;";
             await cmd.ExecuteNonQueryAsync();
         }
 
+        /// <summary>
+        /// Soft delete: klient staje się archiwalny (IsActive = 0).
+        /// </summary>
         public async Task DeleteAsync(int id)
         {
-            await using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-            await using var cmd = connection.CreateCommand();
-            cmd.CommandText = "DELETE FROM Customers WHERE Id = @Id;";
-            AddParameter(cmd, "@Id", id);
-            await cmd.ExecuteNonQueryAsync();
+            await SetActiveAsync(id, false);
         }
 
         public async Task<IReadOnlyList<Customer>> SearchByNameAsync(string name)
@@ -100,7 +99,7 @@ WHERE Id = @Id;";
             cmd.CommandText = @"
 SELECT Id, Name, Email 
 FROM Customers
-WHERE Name LIKE @Name
+WHERE Name LIKE @Name AND IsActive = 1
 ORDER BY Name;";
             AddParameter(cmd, "@Name", $"%{name}%");
 
@@ -112,6 +111,52 @@ ORDER BY Name;";
 
             return result;
         }
+
+        // --- NOWE METODY DLA ADMINA ---
+
+        public async Task<IReadOnlyList<Customer>> GetAllIncludingInactiveAsync()
+        {
+            var result = new List<Customer>();
+            await using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+            await using var cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT Id, Name, Email FROM Customers ORDER BY IsActive DESC, Name;";
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                result.Add(MapCustomer(reader));
+            }
+
+            return result;
+        }
+
+        public async Task<IReadOnlyList<Customer>> GetInactiveAsync()
+        {
+            var result = new List<Customer>();
+            await using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+            await using var cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT Id, Name, Email FROM Customers WHERE IsActive = 0 ORDER BY Name;";
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                result.Add(MapCustomer(reader));
+            }
+
+            return result;
+        }
+
+        public async Task SetActiveAsync(int id, bool isActive)
+        {
+            await using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+            await using var cmd = connection.CreateCommand();
+            cmd.CommandText = "UPDATE Customers SET IsActive = @IsActive WHERE Id = @Id;";
+            AddParameter(cmd, "@Id", id);
+            AddParameter(cmd, "@IsActive", isActive ? 1 : 0);
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        // --- helpers ---
 
         private static Customer MapCustomer(DbDataReader reader)
         {

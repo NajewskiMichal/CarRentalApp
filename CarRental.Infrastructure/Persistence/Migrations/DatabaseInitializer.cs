@@ -43,13 +43,15 @@ CREATE TABLE IF NOT EXISTS Cars (
     Brand TEXT NOT NULL,
     Model TEXT NOT NULL,
     Year  INTEGER NOT NULL,
-    Vin   TEXT NOT NULL
+    Vin   TEXT NOT NULL,
+    IsActive INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS Customers (
     Id    INTEGER PRIMARY KEY AUTOINCREMENT,
     Name  TEXT NOT NULL,
-    Email TEXT NOT NULL
+    Email TEXT NOT NULL,
+    IsActive INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS Rentals (
@@ -68,7 +70,8 @@ CREATE TABLE IF NOT EXISTS Users (
     Email        TEXT NOT NULL,
     PasswordHash TEXT NOT NULL,
     Salt         TEXT NOT NULL,
-    Role         INTEGER NOT NULL
+    Role         INTEGER NOT NULL,
+    IsActive     INTEGER NOT NULL DEFAULT 1
 );
 ";
             await using var cmd = connection.CreateCommand();
@@ -98,6 +101,7 @@ CREATE TABLE IF NOT EXISTS Users (
             // or you can insert a placeholder and force password reset.
             //
             // Seed default admin user with a real hashed password (password: admin123)
+
             await using (var insertCmd = connection.CreateCommand())
             {
                 insertCmd.CommandText = @"

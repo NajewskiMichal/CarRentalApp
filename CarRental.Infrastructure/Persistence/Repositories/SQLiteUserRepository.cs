@@ -26,7 +26,7 @@ namespace CarRental.Infrastructure.Persistence.Repositories
             cmd.CommandText = @"
 SELECT Id, Username, Email, PasswordHash, Salt, Role
 FROM Users
-WHERE Id = @Id;";
+WHERE Id = @Id AND IsActive = 1;";
             AddParameter(cmd, "@Id", id);
 
             await using var reader = await cmd.ExecuteReaderAsync();
@@ -46,6 +46,7 @@ WHERE Id = @Id;";
             cmd.CommandText = @"
 SELECT Id, Username, Email, PasswordHash, Salt, Role
 FROM Users
+WHERE IsActive = 1
 ORDER BY Username;";
 
             await using var reader = await cmd.ExecuteReaderAsync();
@@ -100,13 +101,12 @@ WHERE Id = @Id;";
             await cmd.ExecuteNonQueryAsync();
         }
 
+        /// <summary>
+        /// Soft delete: użytkownik staje się nieaktywny (IsActive = 0).
+        /// </summary>
         public async Task DeleteAsync(int id)
         {
-            await using var connection = await _connectionFactory.CreateOpenConnectionAsync();
-            await using var cmd = connection.CreateCommand();
-            cmd.CommandText = "DELETE FROM Users WHERE Id = @Id;";
-            AddParameter(cmd, "@Id", id);
-            await cmd.ExecuteNonQueryAsync();
+            await SetActiveAsync(id, false);
         }
 
         public async Task<User?> GetByUsernameAsync(string username)
@@ -116,7 +116,7 @@ WHERE Id = @Id;";
             cmd.CommandText = @"
 SELECT Id, Username, Email, PasswordHash, Salt, Role
 FROM Users
-WHERE Username = @Username;";
+WHERE Username = @Username AND IsActive = 1;";
             AddParameter(cmd, "@Username", username);
 
             await using var reader = await cmd.ExecuteReaderAsync();
@@ -128,6 +128,59 @@ WHERE Username = @Username;";
             return null;
         }
 
+        // --- NOWE METODY DLA ADMINA ---
+
+        public async Task<IReadOnlyList<User>> GetAllIncludingInactiveAsync()
+        {
+            var result = new List<User>();
+            await using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+            await using var cmd = connection.CreateCommand();
+            cmd.CommandText = @"
+SELECT Id, Username, Email, PasswordHash, Salt, Role
+FROM Users
+ORDER BY IsActive DESC, Username;";
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                result.Add(MapUser(reader));
+            }
+
+            return result;
+        }
+
+        public async Task<IReadOnlyList<User>> GetInactiveAsync()
+        {
+            var result = new List<User>();
+            await using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+            await using var cmd = connection.CreateCommand();
+            cmd.CommandText = @"
+SELECT Id, Username, Email, PasswordHash, Salt, Role
+FROM Users
+WHERE IsActive = 0
+ORDER BY Username;";
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                result.Add(MapUser(reader));
+            }
+
+            return result;
+        }
+
+        public async Task SetActiveAsync(int id, bool isActive)
+        {
+            await using var connection = await _connectionFactory.CreateOpenConnectionAsync();
+            await using var cmd = connection.CreateCommand();
+            cmd.CommandText = "UPDATE Users SET IsActive = @IsActive WHERE Id = @Id;";
+            AddParameter(cmd, "@Id", id);
+            AddParameter(cmd, "@IsActive", isActive ? 1 : 0);
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        // --- helpers ---
+
         private static User MapUser(DbDataReader reader)
         {
             var id = reader.GetInt32(0);
@@ -136,6 +189,7 @@ WHERE Username = @Username;";
             var passwordHash = reader.GetString(3);
             var salt = reader.GetString(4);
             var roleInt = reader.GetInt32(5);
+
             var role = (UserRole)roleInt;
 
             var emailVo = Email.Create(email);
