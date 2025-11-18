@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using CarRental.Application.Interfaces.Services;
 using CarRental.ConsoleUI.Input;
@@ -25,7 +26,31 @@ namespace CarRental.ConsoleUI.Commands.Rental
             Console.Clear();
             ConsoleHelper.WriteHeader("Return Car");
 
-            var rentalId = _input.ValidateIntegerInput("Rental ID: ", 1);
+            var activeRentals = await _rentalService.GetActiveAsync();
+            if (activeRentals.Count == 0)
+            {
+                ConsoleHelper.WriteWarning("There are no active rentals.");
+                ConsoleHelper.WaitForKeyPress();
+                return;
+            }
+
+            ConsoleHelper.WriteInfo("Active rentals:");
+            EntityListPrinter.PrintRentals(activeRentals);
+            Console.WriteLine();
+
+            int rentalId;
+            while (true)
+            {
+                rentalId = _input.ValidateIntegerInput("Rental ID to close: ", 1);
+
+                if (activeRentals.Any(r => r.Id == rentalId))
+                {
+                    break;
+                }
+
+                ConsoleHelper.WriteWarning("Rental with given ID does not exist. Please enter an ID from the list above.");
+            }
+
             var returnDate = DateTime.Now;
 
             try

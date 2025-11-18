@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using CarRental.Application.Interfaces.Services;
 using CarRental.ConsoleUI.Input;
 using CarRental.ConsoleUI.Utils;
@@ -24,7 +26,30 @@ namespace CarRental.ConsoleUI.Commands.Customer
             Console.Clear();
             ConsoleHelper.WriteHeader("Edit Customer");
 
-            var id = _input.ValidateIntegerInput("Customer ID: ", 1);
+            var customers = await _customerService.GetAllAsync();
+            if (customers.Count == 0)
+            {
+                ConsoleHelper.WriteWarning("No customers found. There is nothing to edit.");
+                ConsoleHelper.WaitForKeyPress();
+                return;
+            }
+
+            ConsoleHelper.WriteInfo("Available customers:");
+            EntityListPrinter.PrintCustomers(customers);
+            Console.WriteLine();
+
+            int id;
+            while (true)
+            {
+                id = _input.ValidateIntegerInput("Customer ID to edit: ", 1);
+
+                if (customers.Any(c => c.Id == id))
+                {
+                    break;
+                }
+
+                ConsoleHelper.WriteWarning("Customer with given ID does not exist. Please enter an ID from the list above.");
+            }
 
             try
             {

@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using CarRental.Application.Interfaces.Services;
 using CarRental.ConsoleUI.Input;
 using CarRental.ConsoleUI.Utils;
@@ -24,12 +26,36 @@ namespace CarRental.ConsoleUI.Commands.Car
             Console.Clear();
             ConsoleHelper.WriteHeader("Edit Car");
 
-            var id = _input.ValidateIntegerInput("Car ID: ", 1);
+            var cars = await _carService.GetAllAsync();
+            if (cars.Count == 0)
+            {
+                ConsoleHelper.WriteWarning("No cars found. There is nothing to edit.");
+                ConsoleHelper.WaitForKeyPress();
+                return;
+            }
+
+            ConsoleHelper.WriteInfo("Available cars:");
+            EntityListPrinter.PrintCars(cars);
+            Console.WriteLine();
+
+            int id;
+            while (true)
+            {
+                id = _input.ValidateIntegerInput("Car ID to edit: ", 1);
+
+                if (cars.Any(c => c.Id == id))
+                {
+                    break;
+                }
+
+                ConsoleHelper.WriteWarning("Car with given ID does not exist. Please enter an ID from the list above.");
+            }
 
             try
             {
                 var existing = await _carService.GetByIdAsync(id);
-                ConsoleHelper.WriteInfo($"Editing: {existing.Brand} {existing.Model} ({existing.Year}), VIN={existing.Vin}");
+                ConsoleHelper.WriteInfo(
+                    $"Editing: {existing.Brand} {existing.Model} ({existing.Year}), VIN={existing.Vin}");
 
                 var brand = _input.ValidateInputNotEmpty($"Brand [{existing.Brand}]: ");
                 var model = _input.ValidateInputNotEmpty($"Model [{existing.Model}]: ");

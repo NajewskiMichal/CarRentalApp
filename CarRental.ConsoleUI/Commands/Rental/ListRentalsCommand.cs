@@ -29,12 +29,7 @@ namespace CarRental.ConsoleUI.Commands.Rental
             }
             else
             {
-                foreach (var rental in rentals)
-                {
-                    var status = rental.IsActive ? "ACTIVE" : "CLOSED";
-                    Console.WriteLine(
-                        $"ID={rental.Id} | CustomerId={rental.CustomerId} | CarId={rental.CarId} | Rent={rental.RentDate} | Return={rental.ReturnDate} | {status}");
-                }
+                EntityListPrinter.PrintRentals(rentals);
             }
 
             ConsoleHelper.WaitForKeyPress();

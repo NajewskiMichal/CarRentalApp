@@ -29,10 +29,7 @@ namespace CarRental.ConsoleUI.Commands.Customer
             }
             else
             {
-                foreach (var customer in customers)
-                {
-                    Console.WriteLine($"ID={customer.Id} | {customer.Name} | {customer.Email}");
-                }
+                EntityListPrinter.PrintCustomers(customers);
             }
 
             ConsoleHelper.WaitForKeyPress();

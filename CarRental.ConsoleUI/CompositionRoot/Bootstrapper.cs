@@ -75,14 +75,14 @@ namespace CarRental.ConsoleUI.CompositionRoot
                 new SearchCarsCommand(inputValidator, carService),
 
                 // Customer
-                new AddCustomerCommand(inputValidator, customerService),
+                 new AddCustomerCommand(inputValidator, customerService),
                 new EditCustomerCommand(inputValidator, customerService),
                 new DeleteCustomerCommand(inputValidator, customerService),
                 new ListCustomersCommand(customerService),
                 new SearchCustomersCommand(inputValidator, customerService),
 
                 // Rental
-                new RentCarCommand(inputValidator, rentalService),
+                 new RentCarCommand(inputValidator, rentalService, customerService, carService),
                 new ReturnCarCommand(inputValidator, rentalService),
                 new ListRentalsCommand(rentalService),
 

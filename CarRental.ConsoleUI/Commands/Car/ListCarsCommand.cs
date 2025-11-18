@@ -29,11 +29,7 @@ namespace CarRental.ConsoleUI.Commands.Car
             }
             else
             {
-                foreach (var car in cars)
-                {
-                    Console.WriteLine(
-                        $"ID={car.Id} | {car.Brand} {car.Model} ({car.Year}) | VIN={car.Vin}");
-                }
+                EntityListPrinter.PrintCars(cars);
             }
 
             ConsoleHelper.WaitForKeyPress();
