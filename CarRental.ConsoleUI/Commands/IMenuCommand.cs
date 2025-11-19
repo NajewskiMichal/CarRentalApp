@@ -12,4 +12,11 @@ namespace CarRental.ConsoleUI.Commands
 
         Task ExecuteAsync();
     }
+
+    /// <summary>
+    /// Marker interface for commands that should only be visible to admin users in the main menu.
+    /// </summary>
+    public interface IAdminMenuCommand : IMenuCommand
+    {
+    }
 }
