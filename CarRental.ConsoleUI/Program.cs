@@ -24,7 +24,7 @@ namespace CarRental.ConsoleUI
             var inputValidator = app.InputValidator;
             var mainMenu = new MainMenu(inputValidator, app.Commands);
 
-            // Optional: authentication
+            // Initial login
             var user = await app.LoginScreen.ShowAsync();
             if (user is null)
             {
@@ -63,7 +63,23 @@ namespace CarRental.ConsoleUI
                 }
                 catch (BackNavigationException)
                 {
-                    // user pressed 'B' somewhere – just go back to main menu
+                    // User pressed 'B' somewhere – just go back to main menu
+                }
+                catch (LogoutRequestedException)
+                {
+                    // Clear current user and start a new login flow
+                    UserContext.SetCurrentUser(null);
+
+                    var newUser = await app.LoginScreen.ShowAsync();
+                    if (newUser is null)
+                    {
+                        ConsoleHelper.WriteInfo("Exiting application...");
+                        return;
+                    }
+
+                    UserContext.SetCurrentUser(newUser);
+                    ConsoleHelper.WriteInfo($"Logged in as: {newUser.Username} ({newUser.Role})");
+                    ConsoleHelper.WaitForKeyPress();
                 }
                 catch (Exception ex)
                 {

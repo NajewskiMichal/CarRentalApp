@@ -99,7 +99,9 @@ namespace CarRental.ConsoleUI.CompositionRoot
                 new DeleteUserCommand(inputValidator, userManagementService),
 
                 // System
+                new LogoutCommand(),
                 new ExitApplicationCommand()
+
             };
 
             return new ApplicationContext(
