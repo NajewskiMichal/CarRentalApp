@@ -107,12 +107,14 @@ WHERE Id = @Id;";
         public async Task<IReadOnlyList<Rental>> GetActiveRentalsAsync()
         {
             var result = new List<Rental>();
+
             await using var connection = await _connectionFactory.CreateOpenConnectionAsync();
             await using var cmd = connection.CreateCommand();
+
+            
             cmd.CommandText = @"
 SELECT Id, CustomerId, CarId, RentDate, ReturnDate
-FROM Rentals
-WHERE ReturnDate IS NULL
+FROM ActiveRentalsView
 ORDER BY RentDate DESC;";
 
             await using var reader = await cmd.ExecuteReaderAsync();
